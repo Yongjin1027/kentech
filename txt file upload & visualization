@@ -1,0 +1,46 @@
+clc; clear; close all;
+
+% 공유 드라이브 폴더 경로 설정
+folderPath = 'G:\공유 드라이브\BSL_Data2\BYD_LFP\Data\RAW\4C60';
+
+% TXT 파일 목록 불러오기
+fileList = dir(fullfile(folderPath, '*.txt'));
+
+% 파일 목록 출력
+fprintf('Available files:\n');
+for i = 1:length(fileList)
+    fprintf('%d: %s\n', i, fileList(i).name);
+end
+
+% 사용자 입력으로 파일 선택
+fileIndex = 11; % input('Enter file number to load: ');
+
+% 파일 로드 및 데이터 확인
+selectedFile = fullfile(fileList(fileIndex).folder, fileList(fileIndex).name);
+fprintf('Loading file: %s\n', fileList(fileIndex).name); 
+
+% 데이터 불러오기
+raw_data = readtable(selectedFile, 'Delimiter', '\t', 'VariableNamingRule', 'preserve');
+
+% 필요한 데이터 추출
+time = duration(raw_data.("Total Time")); % 'Total Time' 컬럼을 duration으로 변환
+current = raw_data.("Current(A)");        % 전류 데이터
+voltage = raw_data.("Voltage(V)");        % 전압 데이터
+step_index = raw_data.("Step Index");     % Step Index 컬럼
+datapoint = raw_data.("DataPoint");       % DataPoint 컬럼
+
+figure;
+yyaxis left
+plot(hours(time), current, '-b', 'LineWidth', 1.2);  % 전류 그래프
+ylabel('Current (A)');
+ylim([-80, 80]);  % 전류 축 범위 설정
+
+yyaxis right
+plot(hours(time), voltage, '-r', 'LineWidth', 1.2);  % 전압 그래프
+ylabel('Voltage (V)');
+ylim([1.8, 3.8]);  % 전압 축 범위 설정
+
+xlabel('Time (hours)');
+title('Current and Voltage vs Time');
+legend('Current', 'Voltage');
+grid on;
